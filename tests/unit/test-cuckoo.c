@@ -81,6 +81,26 @@ TEST_F(cuckoo, testCount) {
     CuckooFilter_Free(&ck);
 }
 
+TEST_F(cuckoo, testCountSameBucket) {
+    CuckooFilter ck;
+    ASSERT_EQ(0, CuckooFilter_Init(&ck, 4, DEFAULT_BUCKETSIZE, 500, 0));
+    ASSERT_EQ(2, ck.numBuckets);
+
+    // Hash 1 has fingerprint 2, so both candidate buckets coincide.
+    CuckooHash hash = 1;
+    ASSERT_EQ(0, CuckooFilter_Count(&ck, hash));
+    ASSERT_EQ(CuckooInsert_Inserted, CuckooFilter_Insert(&ck, hash));
+    ASSERT_EQ(1, CuckooFilter_Count(&ck, hash));
+    ASSERT_EQ(CuckooInsert_Inserted, CuckooFilter_Insert(&ck, hash));
+    ASSERT_EQ(2, CuckooFilter_Count(&ck, hash));
+    ASSERT_EQ(1, CuckooFilter_Delete(&ck, hash));
+    ASSERT_EQ(1, CuckooFilter_Count(&ck, hash));
+    ASSERT_EQ(1, CuckooFilter_Delete(&ck, hash));
+    ASSERT_EQ(0, CuckooFilter_Count(&ck, hash));
+
+    CuckooFilter_Free(&ck);
+}
+
 #define NUM_BULK 10000
 
 TEST_F(cuckoo, testRelocations) {

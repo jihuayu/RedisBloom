@@ -199,8 +199,11 @@ static uint64_t subFilterCount(const SubCF *filter, const LookupParams *params) 
     uint64_t loc1 = SubCF_GetIndex(filter, params->h1);
     uint64_t loc2 = SubCF_GetIndex(filter, params->h2);
 
-    return bucketCount(&filter->data[loc1], bucketSize, params->fp) +
-           bucketCount(&filter->data[loc2], bucketSize, params->fp);
+    uint64_t count = bucketCount(&filter->data[loc1], bucketSize, params->fp);
+    if (loc1 != loc2) {
+        count += bucketCount(&filter->data[loc2], bucketSize, params->fp);
+    }
+    return count;
 }
 
 uint64_t CuckooFilter_Count(const CuckooFilter *filter, CuckooHash hash) {
